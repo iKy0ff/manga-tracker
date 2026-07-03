@@ -3,7 +3,7 @@
 
 A self-updating dashboard that tracks manga chapters read (via [Kitsu](https://kitsu.io)), synced automatically in the cloud and viewable from any device — no PC required to be on.
 
-**[→ View the live tracker](https://iky0ff.github.io/manga-pace-ledger/kitsu_tracker.html)**
+**[→ View the live tracker](https://iky0ff.github.io/manga-pace-ledger/manga-pace-ledger.html)**
 
 ---
 
@@ -13,7 +13,7 @@ A self-updating dashboard that tracks manga chapters read (via [Kitsu](https://k
 flowchart TD
     A["Kitsu API<br/>(chapter stats)"] -- "every ~15 min" --> B["GitHub Actions<br/>scripts/sync.mjs"]
     B -- "commits + pushes" --> C["manga_history_data.js"]
-    C -- "served by" --> D["GitHub Pages<br/>kitsu_tracker.html"]
+    C -- "served by" --> D["GitHub Pages<br/>manga-pace-ledger.html"]
     D --> E["💻 PC browser"]
     D --> F["📱 Phone browser"]
 ```
@@ -26,7 +26,7 @@ A scheduled GitHub Actions workflow polls the Kitsu API on a cron, compares the 
 
 | Path | Purpose |
 |---|---|
-| `kitsu_tracker.html` | The dashboard — charts, streaks, goals, pace stats. Reads `manga_history_data.js` on load. |
+| `manga-pace-ledger.html` | The dashboard — charts, streaks, goals, pace stats. Reads `manga_history_data.js` on load. |
 | `manga_history_data.js` | The data file. An array of `{ date1, date2, chapters }` entries; overwritten in place by the sync. |
 | `scripts/sync.mjs` | Node script that fetches Kitsu, parses the chapter count, and appends/updates an entry. |
 | `.github/workflows/sync.yml` | Scheduled workflow that runs `sync.mjs` and commits the result. |
@@ -76,7 +76,7 @@ The Kitsu user ID `1699796` is baked directly into the URL in **two places** —
 | File | Line |
 |---|---|
 | `scripts/sync.mjs` | `const KITSU_URL = 'https://kitsu.io/api/edge/users/1699796/stats';` |
-| `kitsu_tracker.html` | inside `checkForUpdates()`: `fetch('https://kitsu.io/api/edge/users/1699796/stats?cachebuster=...')` |
+| `manga-pace-ledger.html` | inside `checkForUpdates()`: `fetch('https://kitsu.io/api/edge/users/1699796/stats?cachebuster=...')` |
 
 **To point it at your own account:**
 
