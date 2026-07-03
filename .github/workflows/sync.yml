@@ -17,6 +17,8 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    env:
+      TZ: 'Europe/Paris'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
