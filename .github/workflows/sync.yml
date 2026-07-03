@@ -2,10 +2,9 @@ name: Sync Kitsu Manga Stats
 
 on:
   schedule:
-    # Offset from :00/:15/:30/:45 to avoid the pile-up of jobs everyone
-    # else schedules on the exact quarter-hour (reduces run delays).
+    # Offset from :00/:15/:30/:45 to avoid global queue pile-ups
     - cron: '7,22,37,52 * * * *'
-  workflow_dispatch: {} # lets you trigger a run manually from the Actions tab
+  workflow_dispatch: {}
 
 permissions:
   contents: write
