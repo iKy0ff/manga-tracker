@@ -52,8 +52,11 @@ jobs:
 
       - name: Run sync script
         run: node scripts/sync.mjs
+        continue-on-error: true
+        id: sync_step
 
       - name: Commit and push if changed
+        if: always()
         run: |
           git config user.name "manga-sync-bot"
           git config user.email "actions@users.noreply.github.com"
@@ -71,4 +74,8 @@ jobs:
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push
           fi
+
+      - name: Fail the run if the sync script failed
+        if: steps.sync_step.outcome == 'failure'
+        run: exit 1
 

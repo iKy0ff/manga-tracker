@@ -16,6 +16,7 @@ A self-updating dashboard that tracks manga chapters read (via [Kitsu](https://k
 - [Setup](#setup)
   - [Option A — GitHub Actions only](#option-a--github-actions-only-simplest)
   - [Option B — GitHub Actions + an external cron pinger](#option-b--github-actions--an-external-cron-pinger-more-frequent-updates)
+  - [Option C — Manual (local) only](#option-c--manual-local-only-no-automation)
 - [Switching sync modes](#switching-sync-modes)
 - [Pointing it at your own Kitsu account](#pointing-it-at-your-own-kitsu-account)
 - [Customizing](#customizing)
@@ -59,6 +60,7 @@ A scheduled GitHub Actions workflow polls the Kitsu API, compares the result to 
 | `sync_errors.log` | Timestamped log of failed fetches, parse errors, or skipped anomalies. Empty/absent when everything's healthy. |
 | `local-fallback/fetch_manga_stats.vbs` | Original Windows script this was ported from. Only relevant if you want to run the sync locally instead of via GitHub Actions — not needed for the automated flow. |
 | `favicons/` | Site favicon set (browser tab / home-screen icon) — `favicon.ico` plus PNGs at several sizes. |
+| `.nojekyll` | Empty marker file that tells GitHub Pages to skip Jekyll processing, since this is a plain static site. |
 
 ---
 
@@ -73,7 +75,7 @@ Each run:
    - **Higher value, normal jump** → backs up the data file (rolling `.bak` + a dated copy in `daily_backup/`), then appends a new entry.
    - **Jump of 500+ chapters** (configurable) → treated as a probable bad API response, not a real reading binge. Logged as an anomaly and **skipped** rather than written.
 4. Prunes any file in `daily_backup/` older than `KEEP_DAILY_BACKUPS` (default **30 days**), so the folder doesn't grow forever.
-5. Commits and pushes only if something actually changed — no empty commit spam.
+5. Commits and pushes only if something actually changed — no empty commit spam. This step runs even if the fetch/parse failed above, so a failure still gets its explanation committed to `sync_errors.log` instead of being lost when the runner shuts down.
 
 ---
 
@@ -86,6 +88,7 @@ Each run:
 - **Scope tokens minimally.** A PAT used only to trigger this workflow needs at most `repo` (classic) or `Actions: Read and write` + `Contents: Read and write` (fine-grained) — it doesn't need full account access.
 - **Public repo required for the free tier.** GitHub Pages and unlimited Actions minutes on the free plan require a public repository. Don't put anything you want private in this repo.
 - **Running both GitHub's schedule and an external pinger at once means more total runs than either alone.** Not harmful (`concurrency` prevents overlap, and unchanged data just refreshes a timestamp), but it does burn more Actions minutes than necessary. If you only want one source of truth for timing, set `SYNC_MODE` accordingly — see [Switching sync modes](#switching-sync-modes).
+- **A red ❌ run in the Actions tab doesn't necessarily mean something's broken.** The workflow intentionally fails (non-zero exit) when a fetch fails after all retries, or when an anomalous jump is detected and skipped — that's the script correctly refusing to write bad data, not a crash. Check `sync_errors.log` in the repo for the actual reason before assuming something needs fixing.
 
 ---
 
@@ -131,6 +134,21 @@ Because GitHub's own scheduler can lag under load, you can instead have a third-
 
 > Paste your own token into the cron service's own credential field only — never into this repo, a commit, or anywhere that ends up public. If a token is ever exposed, revoke it immediately and generate a new one.
 
+### Option C — Manual (local) only, no automation
+
+If you'd rather not have anything running on GitHub's infrastructure at all, you can run the exact same script by hand:
+
+1. Install [Node.js](https://nodejs.org) 18 or later (the script uses the built-in `fetch`, no `npm install` needed).
+2. Clone the repo and, from its root, run:
+   ```
+   node scripts/sync.mjs
+   ```
+3. This updates `manga_history_data.js` (and its backups) locally, exactly like the GitHub Action would.
+4. Commit and push the changes yourself: `git add -A && git commit -m "manual sync" && git push`.
+5. Set the repo variable `SYNC_MODE` to `manual` (see [Switching sync modes](#switching-sync-modes)) so GitHub doesn't also try to run it automatically in parallel.
+
+Note that with this option, GitHub Pages will only show updates whenever you remember to run the script and push — there's no "self-updating" without at least one of the automated options above.
+
 ---
 
 ## Switching sync modes
@@ -164,7 +182,6 @@ Note: the **"⇅ Check Live"** button on the dashboard itself is a separate, unr
 ---
 
 ## Pointing it at your own Kitsu account
-
 
 The Kitsu user ID is baked directly into the URL in **two places** — anyone forking this repo needs to change both, or it'll keep syncing the original owner's chapter count, not yours:
 
