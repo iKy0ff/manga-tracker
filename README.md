@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/29652153/README.md)
 # 📖 Manga Pace Ledger
 
 A self-updating dashboard that tracks manga chapters read (via [Kitsu](https://kitsu.io)), synced automatically in the cloud and viewable from any device — no PC required to be on.
@@ -61,6 +62,7 @@ A scheduled GitHub Actions workflow polls the Kitsu API, compares the result to 
 | `local-fallback/fetch_manga_stats.vbs` | Original Windows script this was ported from. Only relevant if you want to run the sync locally instead of via GitHub Actions — not needed for the automated flow. |
 | `favicons/` | Site favicon set (browser tab / home-screen icon) — `favicon.ico` plus PNGs at several sizes. |
 | `.nojekyll` | Empty marker file that tells GitHub Pages to skip Jekyll processing, since this is a plain static site. |
+| `LICENSE` | MIT license — see the file itself for the full terms. |
 
 ---
 
@@ -221,3 +223,5 @@ The cron in `sync.yml` controls how often GitHub itself checks for updates. Edit
 - The dashboard's data file is loaded with a cache-busting timestamp (`manga_history_data.js?v=...`), so browsers — mobile ones especially — always pull the latest synced data instead of a stale cached copy.
 - The `local-fallback/fetch_manga_stats.vbs` script and its Windows Task Scheduler job are no longer required once the GitHub Actions workflow is running, but can be kept as a manual/offline fallback.
 - Everything here — the workflow, the sync script, and the dashboard — reads from the same `manga_history_data.js` file, so Option A and Option B are fully interchangeable; you can switch between them at any time without touching your data.
+- `manga-pace-ledger.html`'s `<head>` includes a description meta tag plus Open Graph / Twitter Card tags, so pasting the dashboard link into Discord, Slack, or similar shows a proper title, blurb, and thumbnail instead of a bare URL. If you fork this and change the GitHub Pages URL, update the `og:image` and `og:url` values in the `<head>` to match.
+- This project is licensed under **MIT** (see `LICENSE`) — anyone can copy, modify, or reuse the code as long as the copyright notice is kept.
